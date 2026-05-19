@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <link rel="apple-touch-icon" sizes="180x180" href="pictures/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="pictures/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="pictures/favicon/favicon-16x16.png">
+  <link rel="manifest" href="pictures/favicon/site.webmanifest">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sofuoğlu Baklava | Burdur'un En İyi Baklavacısı</title>
+  <meta name="description"
+    content="Burdur'un kalbinde, geleneksel yöntemlerle hazırlanan çıtır çıtır baklavanın adresi: Sofuoğlu Baklava. Antep fıstıklı baklava, ev baklavası, sarı burma ve su böreği çeşitlerimizle hizmetinizdeyiz. Tepsi ve kilo ile sipariş için hemen tıklayın.">
+  <meta name="keywords"
+    content="burdur,baklava,burdur baklava, burdur baklavacı, sofuoğlu baklava, burdur tepsi baklava siparişi, burdur tatlıcı, burdur su böreği, ev baklavası burdur">
+
+  <!-- WhatsApp Preview -->
+  <meta property="og:title" content="Sofuoğlu Baklava | Burdur">
+  <meta property="og:description"
+    content="Gerçek lezzet, usta ellerden... Burdur içi tepsi ve kilo ile baklava siparişi.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="pictures/Baklava_v4.jpg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+
+    h1,
+    h2,
+    .serif {
+      font-family: 'Playfair Display', serif;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d97706;
+      border-radius: 99px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .nav-scrolled {
+      background: rgba(15, 23, 42, 0.97) !important;
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-bg {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(120, 53, 15, 0.7) 100%),
+        url('pictures/Baklava_v4.jpg') center/cover no-repeat fixed;
+    }
+
+    .prod-card {
+      transition: transform .3s, box-shadow .3s;
+    }
+
+    .prod-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(217, 119, 6, 0.2);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-gold::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, .25) 50%, transparent 60%);
+      transform: translateX(-100%);
+      transition: .6s;
+    }
+
+    .btn-gold:hover::after {
+      transform: translateX(100%);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(.93) translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0)
+      }
+    }
+
+    .modal-box {
+      animation: modalIn .25s ease;
+    }
+
+    /* Toast */
+    @keyframes tIn {
+      from {
+        transform: translateX(110%);
+        opacity: 0
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1
+      }
+    }
+
+    @keyframes tOut {
+      from {
+        transform: translateX(0);
+        opacity: 1
+      }
+
+      to {
+        transform: translateX(110%);
+        opacity: 0
+      }
+    }
+
+    .toast-in {
+      animation: tIn .3s ease forwards;
+    }
+
+    .toast-out {
+      animation: tOut .3s ease forwards;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #f59e0b !important;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, .2);
+    }
+
+    /* Slider Animation - Ping-Pong (1->2->3->4->3->2->1) */
+    @keyframes slideAnimation {
+      0% {
+        transform: translateX(0%);
+      }
+
+      16.67% {
+        transform: translateX(-100%);
+      }
+
+      33.33% {
+        transform: translateX(-200%);
+      }
+
+      50% {
+        transform: translateX(-300%);
+      }
+
+      66.67% {
+        transform: translateX(-200%);
+      }
+
+      83.33% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(0%);
+      }
+    }
+
+    .slider-wrapper {
+      animation: slideAnimation 35s ease-in-out infinite;
+    }
+
+    /* Responsive Mobile Menu */
+    .mobile-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: rgba(255, 255, 255, 0.9);
+      transition: color .25s ease;
+    }
+
+    .mobile-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 0;
+      height: 2px;
+      background: #fbbf24;
+      transition: width .3s ease;
+    }
+
+    .mobile-link:hover {
+      color: #fcd34d;
+    }
+
+    .mobile-link:hover::after {
+      width: 100%;
+    }
+
+    .menu-close-line {
+      position: absolute;
+      width: 20px;
+      height: 1.5px;
+      background: rgba(255, 255, 255, .9);
+      border-radius: 999px;
+    }
+
+    .menu-close-line:first-child {
+      transform: rotate(45deg);
+    }
+
+    .menu-close-line:last-child {
+      transform: rotate(-45deg);
+    }
+
+    @media (max-width: 767px) {
+      .hidden.md\:flex {
+        display: none !important;
+      }
+
+      #mobileMenuBtn {
+        display: block !important;
+      }
+
+      #mobileMenu {
+        display: flex !important;
+      }
+    }
+
+    @media (min-width: 768px) {
+      #mobileMenuBtn {
+        display: none !important;
+      }
+
+      .hidden.md\:flex {
+        display: flex !important;
+      }
+
+      #mobileMenu {
+        display: none !important;
+      }
+    }
+
+    /* Custom Delay Classes */
+    .delay-600 {
+      animation-delay: 600ms !important;
+      transition-delay: 600ms !important;
+    }
+
+    .delay-800 {
+      animation-delay: 800ms !important;
+      transition-delay: 800ms !important;
+    }
+
+    .delay-900 {
+      animation-delay: 900ms !important;
+      transition-delay: 900ms !important;
+    }
+
+    .delay-1200 {
+      animation-delay: 1200ms !important;
+      transition-delay: 1200ms !important;
+    }
+  </style>
+</head>
+
+<body class="bg-stone-50 text-gray-800">
+
+  <!-- ══════════════ NAV ══════════════ -->
+  <nav id="navbar"
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-3 md:py-4 px-4 md:px-6 lg:px-16 flex justify-between items-center w-full">
+
+    <!-- Left: Logo -->
+    <div class="flex items-center gap-2 md:gap-3">
+      <img src="pictures/logo_v1.0.png" alt="Sofuoğlu Baklava"
+        class="h-10 md:h-11 w-auto object-contain drop-shadow rounded-lg" onerror="this.style.display='none'">
+    </div>
+
+    <!-- Center: Desktop Menu (Absolutely Centered) -->
+    <div
+      class="hidden md:flex absolute left-1/2 -translate-x-1/2 justify-center items-center gap-8 text-xs md:text-sm font-medium">
+      <a href="#hakkimizda"
+        class="relative group text-white/80 hover:text-amber-400 transition-colors duration-300 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-amber-400 after:transition-all after:duration-300 group-hover:after:w-full">Hakkımızda</a>
+      <a href="#urunler"
+        class="relative group text-white/80 hover:text-amber-400 transition-colors duration-300 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-amber-400 after:transition-all after:duration-300 group-hover:after:w-full">Ürünlerimiz</a>
+      <a href="#iletisim"
+        class="relative group text-white/80 hover:text-amber-400 transition-colors duration-300 after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-0 after:h-0.5 after:bg-amber-400 after:transition-all after:duration-300 group-hover:after:w-full">İletişim</a>
+    </div>
+
+    <!-- Right: Mobile Menu Button -->
+    <div class="flex items-center justify-end">
+      <!-- Mobile Menu Button -->
+      <button id="mobileMenuBtn" class="md:hidden text-white/80 hover:text-amber-400 text-2xl transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md">
+        ☰
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobileMenu"
+    class="fixed inset-0 h-full w-full bg-gray-950/98 backdrop-blur-md md:hidden z-[90] transform translate-x-full opacity-0 pointer-events-none transition-all duration-500 ease-out">
+    <button id="mobileMenuCloseBtn" type="button"
+      class="absolute top-6 right-6 w-10 h-10 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 transition-all duration-200 flex items-center justify-center"
+      aria-label="Menüyü kapat">
+      <span class="menu-close-line"></span>
+      <span class="menu-close-line"></span>
+    </button>
+
+    <div class="h-full w-full flex flex-col p-8 pt-16 items-start justify-start">
+      <div class="text-left">
+        <p class="text-[11px] tracking-[0.34em] uppercase text-amber-300/90 font-semibold">Hızlı Menü</p>
+        <h3 class="mt-3 text-3xl font-semibold tracking-[0.14em] text-white serif">SOFUOĞLU Baklava</h3>
+      </div>
+
+      <div class="mt-12 flex flex-col items-start justify-start">
+        <nav class="flex flex-col gap-5 items-start">
+          <a href="#hakkimizda" class="mobile-link text-lg font-medium">
+            <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 10v6"></path>
+              <circle cx="12" cy="7" r="1"></circle>
+            </svg>
+            Hakkımızda
+          </a>
+          <a href="#urunler" class="mobile-link text-lg font-medium">
+            <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <path d="M4 7h16l-1.5 9h-13z"></path>
+              <path d="M9 7V5a3 3 0 0 1 6 0v2"></path>
+            </svg>
+            Ürünlerimiz
+          </a>
+          <a href="#iletisim" class="mobile-link text-lg font-medium">
+            <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"></path>
+              <circle cx="12" cy="10" r="2.3"></circle>
+            </svg>
+            İletişim
+          </a>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenuCloseBtn = document.getElementById('mobileMenuCloseBtn');
+
+    function openMobileMenu() {
+      mobileMenu.classList.remove('translate-x-full', 'opacity-0', 'pointer-events-none');
+      mobileMenu.classList.add('translate-x-0', 'opacity-100', 'pointer-events-auto');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeMobileMenu() {
+      mobileMenu.classList.add('translate-x-full', 'opacity-0', 'pointer-events-none');
+      mobileMenu.classList.remove('translate-x-0', 'opacity-100', 'pointer-events-auto');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    mobileMenuBtn.addEventListener('click', openMobileMenu);
+    mobileMenuCloseBtn.addEventListener('click', closeMobileMenu);
+
+    mobileMenu.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener('click', closeMobileMenu);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMobileMenu();
+      }
+    });
+  </script>
+
+  <!-- ══════════════ HERO ══════════════ -->
+  <section class="min-h-screen bg-amber-50 flex items-center justify-center px-6 relative overflow-hidden">
+    <!-- Hero Slider -->
+    <div class="absolute inset-0 w-full h-full overflow-hidden z-0">
+      <div class="slider-wrapper w-full h-full flex">
+        <img src="pictures/Baklava_v4.jpg" alt="Kayan 1" class="w-full h-full object-cover flex-shrink-0">
+        <img src="pictures/Baklava_v3.jpg" alt="Kayan 2" class="w-full h-full object-cover flex-shrink-0">
+        <img src="pictures/Baklava_v2.jpg" alt="Kayan 3" class="w-full h-full object-cover flex-shrink-0">
+        <img src="pictures/Baklava_v1.jpg" alt="Kayan 1 (Loop)" class="w-full h-full object-cover flex-shrink-0">
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/60"></div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="text-center max-w-4xl mx-auto relative z-10">
+      <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight mb-8"
+        style="font-family:'Playfair Display',serif; color: #FDE047;">
+        Sofuoğlu Baklava<br>
+
+      </h1>
+      <p class="text-lg md:text-2xl mb-12 text-white/90" style="font-weight: 500;">
+        El Emeği Ustalık, Nesil Boyu Süre Gelen Lezzet Mirası
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#urunler"
+          class="btn-gold text-white font-bold px-8 py-3.5 rounded-2xl shadow-lg shadow-amber-500/30 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md text-sm">
+          Ürünlerimizi Keşfet
+        </a>
+        <a href="#iletisim"
+          class="bg-white/20 border border-white/40 text-white font-semibold px-8 py-3.5 rounded-2xl hover:bg-white/30 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md text-sm">
+          Sipariş vermek için iletişime geçin
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Scroll Indicator Arrow ── -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-50 flex flex-col items-center cursor-pointer"
+      onclick="window.scrollBy({top: window.innerHeight, behavior: 'smooth'})">
+      <span class="text-white opacity-80 text-xs font-light mb-2 tracking-widest uppercase">Daha Fazlası İçin
+        Kaydır</span>
+      <svg class="w-8 h-8 text-white opacity-80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ══════════════ HAKKIMIZDA (ZİGZAG) ══════════════ -->
+  <section id="hakkimizda"
+    class="py-12 md:py-24 lg:py-32 px-4 md:px-6 lg:px-16 bg-gradient-to-b from-stone-50 to-white">
+    <div class="max-w-7xl mx-auto">
+
+      <!-- Section Header -->
+      <div class="text-center mb-12 md:mb-20">
+        <div class="text-amber-600 text-xs font-bold uppercase tracking-widest mb-3">Hikayemiz</div>
+        <h2
+          class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100"
+          style="font-family:'Playfair Display',serif">Gelenekten Gelen<br>Bir Lezzet Mirası</h2>
+        <p
+          class="text-gray-500 text-sm md:text-base lg:text-lg max-w-2xl mx-auto opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+          Nesiller boyu süregelen tutku, yufka
+          ve fıstığın eşsiz harmonisi</p>
+      </div>
+
+      <!-- ── Bölüm 1: Kuruluş (Resimler Solda) ── -->
+      <div class="mb-16 md:mb-24">
+        <div class="grid md:grid-cols-2 gap-6 md:gap-12 items-center">
+
+          <!-- Resimler Solda (Mobilde üstte, alt alta) -->
+          <div
+            class="flex flex-col md:flex-row justify-center md:justify-start opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-300">
+            <div class="flex md:items-center flex-col md:flex-row" style="padding: 1rem 0.5rem;">
+              <!-- Resim 1 -->
+              <div class="relative z-10 mb-4 md:mb-0">
+                <img src="pictures/DükkanÖnü_v1.png" alt="Kuruluş 1"
+                  class="w-full md:w-44 h-48 md:h-64 object-cover shadow-2xl cursor-pointer hover:opacity-80 transition"
+                  style="border-radius: 1.5rem; transform: rotate(-6deg);" onerror="this.style.display='none'"
+                  onclick="openLightbox(this.src)">
+              </div>
+              <!-- Resim 2 (ortada, üstte) -->
+              <div class="relative z-20" style="margin-left: 0px;">
+                <img src="pictures/DükkanÖnü_v2.png" alt="Kuruluş 2"
+                  class="w-full md:w-44 h-48 md:h-64 object-cover shadow-2xl cursor-pointer hover:opacity-80 transition"
+                  style="border-radius: 1.5rem; transform: rotate(2deg);" onerror="this.style.display='none'"
+                  onclick="openLightbox(this.src)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Metin Sağda -->
+          <div>
+            <div
+              class="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-4 py-2 rounded-full mb-4 opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+              ✨ Başlangıç
+            </div>
+            <h3
+              class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100"
+              style="font-family:'Playfair Display',serif">
+              Kuruluş ve İlk Adımlar
+            </h3>
+            <p
+              class="text-gray-600 text-sm md:text-base leading-relaxed mb-3 md:mb-4 opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+                Sofuoğlu Baklava'nın hikayesi, Burdur'un güzide sokaklarında köklü bir aile geleneğinin el emeğiyle
+              buluşmasıyla başlar. Her bir dilim baklava; nesiller boyu aktarılan ustalıkla zar gibi açılmış yufkaların,
+              özenle seçilmiş Antep fıstığı ile cevizin ve Burdur yaylalarından gelen halis tereyağının kusursuz uyumuyla
+              hazırlanır.
+            </p>
+            <p
+              class="text-gray-600 text-sm md:text-base leading-relaxed opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+              Kuruluşundan bu yana, biz hiçbir zaman kalitede taviz vermedik. Geleneksel reçetelerimiz, modern ocaklarla
+              birleşerek, eşsiz bir lezzet deneyimi yaratır.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Bölüm 2: Ustalık (Resimler Sağda) ── -->
+      <div class="mb-16 md:mb-24">
+        <div class="grid md:grid-cols-2 gap-6 md:gap-12 items-center">
+
+          <!-- Metin Solda -->
+          <div class="order-last md:order-none">
+            <div
+              class="inline-block bg-orange-100 text-orange-800 text-xs font-bold px-4 py-2 rounded-full mb-4 opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+              🔥 Ustalık
+            </div>
+            <h3
+              class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100"
+              style="font-family:'Playfair Display',serif">
+              Ustalığın Sırrı Nedir?
+            </h3>
+            <p
+              class="text-gray-600 text-sm md:text-base leading-relaxed mb-3 md:mb-4 opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+              Her baklava yapmanın arkasında, yılların deneyimi ve titiz bir özen yatmaktadır. Yufkamızı geleneksel
+              yöntemle açıyoruz, iç malzemelerimizi kaynağından seçiyoruz, ve fırınımızda bizzat gözlem altında
+              pişiririz.
+            </p>
+            <p
+              class="text-gray-600 text-sm md:text-base leading-relaxed mb-3 md:mb-4 opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+              Sırrımız, hiçbir kısayol almamakta, doğal malzemelere sadık kalmakta ve her detaya önem vermekteyiz. Tat,
+              görüntü ve koku bu üçü de mükemmel olmalıdır.
+            </p>
+            <ul
+              class="space-y-2 md:space-y-3 text-gray-600 text-sm md:text-base opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+              <li class="flex items-center gap-3">
+                <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
+                Seçilmiş Antep Fıstığı ve Ceviz
+              </li>
+              <li class="flex items-center gap-3">
+                <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
+                Geleneksel Açılmış İncecik Yufka
+              </li>
+              <li class="flex items-center gap-3">
+                <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
+                Ev Ortamındaki Temizlik ve Hijyen
+              </li>
+            </ul>
+          </div>
+
+          <!-- Resimler Sağda (Mobilde üstte, alt alta) -->
+          <div
+            class="flex justify-center md:justify-end order-first md:order-none opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-400">
+            <div class="flex md:items-center flex-col md:flex-row" style="padding: 1rem 0.5rem;">
+              <!-- Resim 1 -->
+              <div class="relative z-10 mb-3 md:mb-0">
+                <img src="pictures/Baklava_v2.jpg" alt="Ustalık 1"
+                  class="w-full md:w-44 h-48 md:h-64 object-cover shadow-2xl cursor-pointer hover:opacity-80 transition"
+                  style="border-radius: 1.5rem; transform: rotate(-6deg);" onerror="this.style.display='none'"
+                  onclick="openLightbox(this.src)">
+              </div>
+              <!-- Resim 2 (ortada, üstte) -->
+              <div class="relative z-20 mb-3 md:mb-0">
+                <img src="pictures/Baklava_v1.jpg" alt="Ustalık 2"
+                  class="w-full md:w-44 h-48 md:h-64 object-cover shadow-2xl cursor-pointer hover:opacity-80 transition"
+                  style="border-radius: 1.5rem; transform: rotate(2deg);" onerror="this.style.display='none'"
+                  onclick="openLightbox(this.src)">
+              </div>
+              <!-- Resim 3 -->
+              <div class="relative z-10">
+                <img src="pictures/Baklava_v3.jpg" alt="Ustalık 3"
+                  class="w-full md:w-44 h-48 md:h-64 object-cover shadow-2xl cursor-pointer hover:opacity-80 transition"
+                  style="border-radius: 1.5rem; transform: rotate(-3deg);" onerror="this.style.display='none'"
+                  onclick="openLightbox(this.src)">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Bölüm 3: Bugün (Resimler Solda) ── -->
+      <div>
+        <div class="grid md:grid-cols-2 gap-6 md:gap-12 items-center">
+
+          <!-- Resimler Solda (Mobilde üstte, alt alta) -->
+          <div
+            class="flex justify-center md:justify-start order-first md:order-none opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-400">
+            <div class="flex md:items-center flex-col md:flex-row" style="padding: 1rem 0.5rem;">
+              <!-- Resim 1 -->
+              <div class="relative z-10 mb-3 md:mb-0">
+                <img src="pictures/Baklava_v4.jpg" alt="Bugün 1"
+                  class="w-full md:w-44 h-48 md:h-64 object-cover shadow-2xl cursor-pointer hover:opacity-80 transition"
+                  style="border-radius: 1.5rem; transform: rotate(-5deg);" onerror="this.style.display='none'"
+                  onclick="openLightbox(this.src)">
+              </div>
+              <!-- Resim 2 (ortada, üstte) -->
+              <div class="relative z-20">
+                <img src="pictures/SoğukBaklava_v1.png" alt="Bugün 2"
+                  class="w-full md:w-44 h-48 md:h-64 object-cover shadow-2xl cursor-pointer hover:opacity-80 transition"
+                  style="border-radius: 1.5rem; transform: rotate(3deg);" onerror="this.style.display='none'"
+                  onclick="openLightbox(this.src)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Metin Sağda -->
+          <div>
+            <div
+              class="inline-block bg-green-100 text-green-800 text-xs font-bold px-4 py-2 rounded-full mb-4 opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+              🌟 Bugün
+            </div>
+            <h3
+              class="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100"
+              style="font-family:'Playfair Display',serif">
+              Geleceğe Doğru Adımlar
+            </h3>
+            <p
+              class="text-gray-600 text-sm md:text-base leading-relaxed mb-3 md:mb-4 opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+              Bugün, Sofuoğlu Baklava sadece bir işletme değil, bir mirastır. Her müşteri, bu mirası taşıyan bir
+              parçayı alır evine. İster toplu sipariş olsun, ister aileden biri için özel bir hazırlık, biz her siparişe
+              aynı sevgi ve özen gösteririz.
+            </p>
+            <!-- <p class="text-gray-600 text-sm md:text-base leading-relaxed">
+              Sosyal medyada bizi takip ettiğinizde, yeni ürün araştırmalarımızdan, mevsimlik önerilerimizden ve
+              haber-huylu mektepli anlarımızdan haberdar olabilirsiniz. Siparişiniz için iletişime geçin, biz her zaman buradayız!
+            </p> -->
+            <div
+              class="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-200 opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-100">
+              <p class="text-xs md:text-sm font-semibold text-amber-700 italic">
+                "Her baklava, bir hikaye. Senin hikayen, bizim sunduğumuzla başlasın."
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ ÜRÜNLER ══════════════ -->
+  <section id="urunler" class="py-12 md:py-20 lg:py-24 px-4 md:px-6 lg:px-16 bg-stone-50">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-10 md:mb-14">
+        <div class="text-amber-600 text-xs font-bold uppercase tracking-widest mb-3">Menümüz</div>
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">Özel Ürünlerimiz</h2>
+        <p class="text-gray-400 text-sm md:text-base mt-3 max-w-md mx-auto">Her biri özenle hazırlanmış, eşsiz
+          lezzetlere sahip baklava çeşitlerimiz</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <!-- Kare Baklava -->
+        <div
+          class="prod-card bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-animate delay-100">
+          <img src="pictures/gmnikare.png" alt="Kare Baklava" class="h-48 w-full object-cover rounded-t-3xl"
+            onerror="this.style.display='none'">
+          <div class="p-5">
+            <div class="text-xs font-bold text-amber-600 uppercase tracking-wide mb-1">Klasik</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Kare Baklava</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">İnce yufkalar arasında özenle yerleştirilmiş Antep Fıstığı
+              ve Cevizli seçenekleriyle hazırlanan klasik kare baklavamız.</p>
+          </div>
+        </div>
+        <!-- Ev Baklavası -->
+        <div
+          class="prod-card bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-animate delay-200">
+          <img src="pictures/gmniev1.png" alt="Ev Baklavası" class="h-48 w-full object-cover rounded-t-3xl"
+            onerror="this.style.display='none'">
+          <div class="p-5">
+            <div class="text-xs font-bold text-orange-600 uppercase tracking-wide mb-1">Geleneksel</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Ev Baklavası</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">Ev usulü tariflerin getirdiği o eşsiz sıcaklıkla
+              hazırlanan, gönüllere dokunan bol katkılı tatlımız.</p>
+          </div>
+        </div>
+        <!-- Sarı Burma -->
+        <div
+          class="prod-card bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-animate delay-300">
+          <img src="pictures/sarıburma_v1.png" alt="Sarı Burma" class="h-48 w-full object-cover rounded-t-3xl"
+            onerror="this.style.display='none'">
+          <div class="p-5">
+            <div class="text-xs font-bold text-yellow-600 uppercase tracking-wide mb-1">Özel</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Sarı Burma</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">Tel tel ayrılan kadayıf yufkasıyla sarılmış, fındık dolu
+              eşsiz sarı burmamız.</p>
+          </div>
+        </div>
+        <!-- Su Böreği -->
+        <div
+          class="prod-card bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-animate delay-500">
+          <img src="pictures/suboregi_v1.jpg" alt="Su Böreği" class="h-48 w-full object-cover rounded-t-3xl"
+            onerror="this.style.display='none'">
+          <div class="p-5">
+            <div class="text-xs font-bold text-sky-600 uppercase tracking-wide mb-1">Taze</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Su Böreği</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">Haşlanmış yufkalarla hazırlanan, peynirli geleneksel su
+              böreğimiz.</p>
+          </div>
+        </div>
+        <!-- Şöbiyet -->
+        <div
+          class="prod-card bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100 opacity-0 translate-y-8 transition-all duration-500 ease-out scroll-animate delay-500">
+          <img src="pictures/gmnisobiyet.png" alt="Şöbiyet" class="h-48 w-full object-cover rounded-t-3xl"
+            onerror="this.style.display='none'">
+          <div class="p-5">
+            <div class="text-xs font-bold text-rose-600 uppercase tracking-wide mb-1">Premium</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Şöbiyet</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">Yufka içinde eritilmiş Fındık ve Antep Fıstığı ile yapılan,
+              lezzetli şöbiyetimiz.</p>
+          </div>
+        </div>
+        <!-- Fıstıklı Sarma -->
+        <div
+          class="prod-card bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-animate delay-600">
+          <img src="pictures/gmnifıstıkburma.png" alt="Fıstıklı Sarma" class="h-48 w-full object-cover rounded-t-3xl"
+            onerror="this.style.display='none'">
+          <div class="p-5">
+            <div class="text-xs font-bold text-lime-600 uppercase tracking-wide mb-1">Özel</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Fıstıklı Burma</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">İncecik yufkaya sarılmış, içinde bolca Antep Fıstığı
+              barındıran lezzetli sarmamız.</p>
+          </div>
+        </div>
+        <!-- Midye Baklava -->
+        <div
+          class="prod-card bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-animate delay-700">
+          <img src="pictures/gmnimidye.png" alt="Midye Baklava" class="h-48 w-full object-cover rounded-t-3xl"
+            onerror="this.style.display='none'">
+          <div class="p-5">
+            <div class="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">Doyurucu</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Midye</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">Görünümü midye kabuğunu andıran, içi bol Antep
+              Fıstığı ile dolu olan çıtır bir Gaziantep tatlısıdır</p>
+          </div>
+        </div>
+        <!-- Soğuk Baklava -->
+        <div
+          class="prod-card bg-white rounded-3xl overflow-hidden shadow-md border border-gray-100 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-animate delay-800">
+          <img src="pictures/SoğukBaklava_v1.png" alt="Soğuk Baklava" class="h-48 w-full object-cover rounded-t-3xl"
+            onerror="this.style.display='none'">
+          <div class="p-5">
+            <div class="text-xs font-bold text-indigo-600 uppercase tracking-wide mb-1">Serinletici</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Soğuk Baklava</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">Buzdolabında saklanarak servis edilen, hafif ve ferah
+              tat ile yaz aylarının ideal baklava.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ İLETİŞİM ══════════════ -->
+  <section id="iletisim" class="py-12 md:py-20 lg:py-24 px-4 md:px-6 lg:px-16 bg-gray-900 text-white">
+    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+      <div class="opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate">
+        <div class="text-amber-400 text-xs font-bold uppercase tracking-widest mb-3">Bize Ulaşın</div>
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6">Sipariş &<br>İletişim</h2>
+        <p class="text-gray-400 text-sm md:text-base mb-6 md:mb-8 leading-relaxed">
+          Toplu sipariş, özel gün siparişleri veya merak ettikleriniz için bize ulaşın. Teslim ve paketleme konusunda
+          size yardımcı olmaktan mutluluk duyarız.
+        </p>
+        <div class="space-y-3 md:space-y-4">
+          <div
+            class="flex items-center gap-3 md:gap-4 bg-white/5 rounded-2xl p-3 md:p-4 transition-all duration-700 ease-out scroll-animate opacity-0 translate-y-8 delay-100 hover:-translate-y-1 hover:shadow-lg hover:bg-gray-800">
+            <img src="pictures/icon-location.png" alt="Adres" class="w-8 md:w-10 h-8 md:h-10 object-contain"
+              onerror="this.style.display='none'">
+            <div>
+              <div class="text-xs text-gray-500 font-medium">Adres</div>
+              <div class="text-xs md:text-sm font-semibold">Sofuoğlu Baklavalari, Bozkurt, 15030 Burdur/Merkez</div>
+            </div>
+          </div>
+          <div
+            class="flex items-center gap-3 md:gap-4 bg-white/5 rounded-2xl p-3 md:p-4 transition-all duration-700 ease-out scroll-animate opacity-0 translate-y-8 delay-300 hover:-translate-y-1 hover:shadow-lg hover:bg-gray-800">
+            <img src="pictures/icon-phone.png" alt="Telefon" class="w-8 md:w-10 h-8 md:h-10 object-contain"
+              onerror="this.style.display='none'">
+            <div>
+              <div class="text-xs text-gray-500 font-medium">Telefon</div>
+              <div class="text-xs md:text-sm font-semibold">0248 502 11 11</div>
+            </div>
+          </div>
+          <div
+            class="flex items-center gap-3 md:gap-4 bg-white/5 rounded-2xl p-3 md:p-4 transition-all duration-700 ease-out scroll-animate opacity-0 translate-y-8 delay-500 hover:-translate-y-1 hover:shadow-lg hover:bg-gray-800">
+            <img src="pictures/icon-clock.png" alt="Çalışma Saatleri" class="w-8 md:w-10 h-8 md:h-10 object-contain"
+              onerror="this.style.display='none'">
+            <div>
+              <div class="text-xs text-gray-500 font-medium">Çalışma Saatleri</div>
+              <div class="text-xs md:text-sm font-semibold">Her gün 09:00 – 23:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Harita -->
+      <div
+        class="rounded-3xl overflow-hidden border border-white/10 shadow-2xl opacity-0 translate-y-8 transition-all duration-1000 ease-out scroll-animate delay-300">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3155.410679170427!2d30.298447608947768!3d37.733508579459176!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14c42db1f7fea51f%3A0xa20adf0fa61b9933!2sSofuo%C4%9Flu%20Baklavalari!5e0!3m2!1str!2str!4v1777378228019!5m2!1str!2str"
+          class="w-full h-64 md:h-96" style="border:0;" allowfullscreen="" loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="bg-gray-950 text-gray-500 py-6 md:py-8 px-2 md:px-6 text-center text-[10px] sm:text-xs md:text-sm">
+    <div class="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 md:gap-4">
+
+      <button onclick="openLoginModal()" class="hover:text-gray-500 transition-colors whitespace-nowrap">Sofuoğlu
+        Baklava </button>
+      <span class="hidden sm:inline text-gray-700">|</span>
+      <span class="whitespace-nowrap">Tüm hakları saklıdır.</span>
+      <span class="text-gray-700">|</span>
+      <span class="whitespace-nowrap">© 2026 Sofuoğlu Baklava</span>
+      <span class="text-gray-700">|</span>
+      <span class="flex items-center gap-1">
+        Tasarım & Geliştirme:
+        <a href="https://furkangumus15.github.io/my-personel-website/" target="_blank" rel="noopener noreferrer"
+          class="text-gray-500 hover:text-gray-300 transition-colors font-medium whitespace-nowrap">
+          Furkan Gümüş
+        </a>
+      </span>
+    </div>
+  </footer>
+
+  <!-- ══════════════ LOGIN MODAL ══════════════   -->
+  <div id="loginModal" class="modal-overlay">
+    <div
+      class="modal-box bg-gray-900 rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-sm mx-4 border border-white/10">
+      <div class="px-6 md:px-8 py-6 md:py-8">
+        <div class="text-center mb-5 md:mb-7">
+          <img src="pictures/icon-lock.png" alt="Admin Girişi"
+            class="w-12 md:w-16 h-12 md:h-16 object-contain mx-auto mb-3 md:mb-4" onerror="this.style.display='none'">
+          <h2 class="text-lg md:text-xl font-bold text-white" style="font-family:'Playfair Display',serif">Personel Girişi
+          </h2>
+          <p class="text-gray-500 text-xs mt-1">Yetkili personel girişi</p>
+        </div>
+
+        <div id="loginError"
+          class="hidden mb-4 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-xl px-4 py-3"></div>
+
+        <div class="space-y-3 md:space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1.5">E-posta</label>
+            <input type="email" id="loginEmail" placeholder="E-posta adresinizi girin"
+              class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2.5 md:py-3 text-sm transition placeholder-gray-600">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1.5">Şifre</label>
+            <div class="relative">
+              <input type="password" id="loginPassword" placeholder="••••••••"
+                class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2.5 md:py-3 text-sm transition placeholder-gray-600 pr-12">
+              <button onclick="togglePwd()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 text-lg transition-all duration-200 transform hover:scale-105 active:scale-95">👁</button>
+            </div>
+          </div>
+          <button id="loginBtn" onclick="doLogin()"
+            class="w-full btn-gold text-white font-bold py-2.5 md:py-3 rounded-2xl transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md shadow-lg shadow-amber-500/20 text-sm mt-2">
+            Giriş Yap
+          </button>
+          <button onclick="closeLoginModal()"
+            class="w-full text-gray-600 hover:text-gray-400 text-xs py-2 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md">İptal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-[200] space-y-2 pointer-events-none"></div>
+
+  <!-- ══════════════ Firebase v9+ Modüler SDK ══════════════ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserSessionPersistence }
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // ─── Firebase Tek Init ────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMMDGqvO0LUrPa95CcNuhB3cbGEG_MJeo",
+      authDomain: "ordersystem-1056b.firebaseapp.com",
+      projectId: "ordersystem-1056b",
+      storageBucket: "ordersystem-1056b.firebasestorage.app",
+      messagingSenderId: "1079412134709",
+      appId: "1:1079412134709:web:32ee9ea5d3ef70bb16f27c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // ─── Auth: Arka planda sessizce kontrol —  vitrini ASLA engelleme ─
+    // Kullanıcı zaten giriş yapmışsa admin.html'e yönlendir, yoksa hiçbir şey yapma.
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'admin.html';
+      }
+      // user yoksa → vitrin normal yüklenir, loading ekranı YOK
+    });
+
+    // ─── Navbar scroll efekti ─────────────────────────────────────────
+    const navbar = document.getElementById('navbar');
+    navbar.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0.7), transparent)';
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 60) navbar.classList.add('nav-scrolled');
+      else navbar.classList.remove('nav-scrolled');
+    });
+
+    // ─── Login Modal ──────────────────────────────────────────────────
+    window.openLoginModal = function () {
+      document.getElementById('loginModal').classList.add('open');
+      setTimeout(() => document.getElementById('loginEmail').focus(), 100);
+    };
+
+    window.closeLoginModal = function () {
+      document.getElementById('loginModal').classList.remove('open');
+      document.getElementById('loginError').classList.add('hidden');
+      document.getElementById('loginPassword').value = '';
+    };
+
+    window.togglePwd = function () {
+      const inp = document.getElementById('loginPassword');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    };
+
+    // Overlay dışına tıklayınca kapat
+    document.getElementById('loginModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('loginModal')) window.closeLoginModal();
+    });
+
+    // Enter ile giriş
+    ['loginEmail', 'loginPassword'].forEach(id =>
+      document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); })
+    );
+
+    // ─── Giriş İşlemi ─────────────────────────────────────────────────
+    window.doLogin = async function () {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginBtn');
+      const errEl = document.getElementById('loginError');
+
+      if (!email || !pass) { showErr('E-posta ve şifre zorunludur.'); return; }
+
+      btn.textContent = 'Giriş yapılıyor…';
+      btn.disabled = true;
+      errEl.classList.add('hidden');
+
+      try {
+        await setPersistence(auth, browserSessionPersistence);
+        await signInWithEmailAndPassword(auth, email, pass);
+        window.location.href = 'admin.html';
+      } catch (err) {
+        const msgs = {
+          'auth/user-not-found': 'Bu e-posta ile kayıtlı kullanıcı bulunamadı.',
+          'auth/wrong-password': 'Şifre hatalı. Lütfen tekrar deneyin.',
+          'auth/invalid-email': 'Geçersiz e-posta adresi.',
+          'auth/too-many-requests': 'Çok fazla başarısız deneme. Lütfen bekleyin.',
+          'auth/invalid-credential': 'E-posta veya şifre hatalı.'
+        };
+        showErr(msgs[err.code] || 'Giriş başarısız: ' + err.message);
+        btn.textContent = 'Giriş Yap';
+        btn.disabled = false;
+        console.error('❌ Login hatası:', err.code, err.message);
+      }
+    };
+
+    function showErr(msg) {
+      const el = document.getElementById('loginError');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    // Lightbox Functions
+    function openLightbox(imageSrc) {
+      const overlay = document.getElementById('lightboxOverlay');
+      const lightboxImg = document.getElementById('lightboxImage');
+      lightboxImg.src = imageSrc;
+      overlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      const overlay = document.getElementById('lightboxOverlay');
+      overlay.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    // Close lightbox when clicking on the overlay or X button
+    document.addEventListener('DOMContentLoaded', function () {
+      const overlay = document.getElementById('lightboxOverlay');
+      const closeBtn = overlay.querySelector('span');
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeLightbox();
+      });
+
+      closeBtn.addEventListener('click', closeLightbox);
+    });
+  </script>
+
+  <!-- Lightbox Modal -->
+  <div id="lightboxModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center hidden z-[2000]">
+    <div class="absolute inset-0 cursor-pointer" onclick="closeLightbox()"></div>
+    <img id="lightboxImg" src="" class="relative max-w-[90%] max-h-[90%] rounded-md border-4 border-white shadow-2xl">
+    <button onclick="closeLightbox()"
+      class="absolute top-5 right-10 text-white text-5xl font-bold hover:text-red-500 z-[2100]">×</button>
+  </div>
+
+  <script>
+    // Lightbox Functions
+    function openLightbox(src) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightboxModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+      document.getElementById('lightboxModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  </script>
+
+  <!-- ══════════════ SCROLL ANIMATE GÖZLEMCI ══════════════ -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Ekrana girdiğinde görünür yap ve yukarı kaydır
+            entry.target.classList.remove('opacity-0', 'translate-y-8');
+            entry.target.classList.add('opacity-100', 'translate-y-0');
+            // Animasyon bir kere çalışsın, sürekli tekrarlamasın
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.20 // Elemanın %20'si ekrana girince animasyonu başlat
+      });
+
+      // Animasyon eklenecek tüm elemanları izlemeye başla
+      const animatedElements = document.querySelectorAll('.scroll-animate');
+      animatedElements.forEach((el) => {
+        observer.observe(el);
+      });
+    });
+  </script>
+
+</body>
+
+</html>
