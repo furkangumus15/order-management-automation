@@ -2331,6 +2331,7 @@ function renderActiveTable() {
                 <button type="button" class="w-full px-3 py-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="whatsapp" data-order-id="${o.id}" data-msg-type="reminder">
                   📱 Hatırlat
                 </button>
+                <button type="button" class="w-full px-3 py-1.5 bg-slate-700 text-white rounded-md hover:bg-slate-800 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="printReceipt" data-order-id="${o.id}">🖨️ Fiş Çıkar</button>
                 <button class="w-full px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="edit" data-order-id="${o.id}">✏️ Güncelle</button>
                 <button class="w-full px-4 py-2 bg-green-50 text-green-600 border border-green-200 rounded-md hover:bg-green-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="deliver" data-order-id="${o.id}">✅ Teslim Et</button>
                 <button class="w-full px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="delete" data-order-id="${o.id}">🗑️ Sil</button>
@@ -2379,6 +2380,7 @@ function handleButtonClick(e) {
   else if (action === 'deleteDelivered') deleteDeliveredOrder(orderId);
   else if (action === 'markTrayReturned') markTrayReturned(orderId);
   else if (action === 'revertTrayReturn') revertTrayReturn(orderId);
+  else if (action === 'printReceipt') printReceipt(orderId);
   else if (action === 'whatsapp') {
     const msgType = this.dataset.msgType;
     handleWhatsAppClick(orderId, msgType);
@@ -2494,6 +2496,9 @@ function renderHistoryTable(filteredData = null) {
                   <i class="fas fa-bell"></i> Tepsi İste
                 </button>
                 ` : ''}
+                <button type="button" class="w-full px-3 py-1.5 bg-slate-700 text-white rounded-md hover:bg-slate-800 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="printReceipt" data-order-id="${o.id}">
+                  🖨️ Fiş Çıkar
+                </button>
                 <button onclick="revertToActive('${o.id}')" class="w-full px-4 py-2 bg-orange-50 text-orange-600 border border-orange-200 rounded-md hover:bg-orange-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer">
                   ↩️ Geri Al
                 </button>
@@ -3527,6 +3532,7 @@ window.saveSettings = saveSettings;
 window.loadSettings = loadSettings;
 window.updatePricePreview = updatePricePreview;
 window.calculateOrderTotal = calculateOrderTotal;
+window.printReceipt = printReceipt;
 
 // ─── Yedekleme Fonksiyonları Global Scope ───────────────────────
 window.generateBackupData = generateBackupData;
@@ -3829,6 +3835,204 @@ function handleWhatsAppClick(orderId, msgType) {
   } else {
     console.error('openWhatsApp function not found');
   }
+}
+
+function getOrderReceiptTotal(order) {
+  if (!order) return 0;
+
+  let total = order.totalPrice !== undefined
+    ? Number(order.totalPrice)
+    : Number(calculateOrderTotal(order));
+
+  if (Number.isNaN(total)) total = 0;
+
+  const isDelivered = Boolean(order.deliveredAt);
+  const suBoregiTepsi = Number(order.suBoregi) || 0;
+  if (!isDelivered && suBoregiTepsi > 0) {
+    total += suBoregiTepsi * 400;
+  }
+
+  return Math.round(total * 100) / 100;
+}
+
+function getReceiptUnitPrices(productKey, prices) {
+  if (productKey === 'kareBaklava') return { tray: Number(prices.karetepsi) || 0, kg: Number(prices.karekg) || 0 };
+  if (productKey === 'evBaklavasi') return { tray: Number(prices.evtepsi) || 0, kg: Number(prices.evkg) || 0 };
+  if (productKey === 'sariBurma') return { tray: Number(prices.saritepsi) || 0, kg: Number(prices.sarikg) || 0 };
+  if (productKey === 'suBoregi') return { tray: Number(prices.sutepsi) || 0, kg: Number(prices.sukg) || 0 };
+  if (productKey === 'fistikliBaklava') return { tray: Number(prices.fistiktepsi) || 0, kg: Number(prices.fistikkg) || 0 };
+  if (productKey === 'yufka') return { tray: Number(prices.yufkatepsi) || 0, kg: Number(getYufkaKgPrice(prices)) || 0 };
+  return { tray: 0, kg: 0 };
+}
+
+function buildReceiptItemRows(order) {
+  const prices = globalPriceSettings || window.currentPrices || {};
+  const rows = [];
+
+  PRODUCTS.forEach(p => {
+    const trays = Number(getProductValue(order, p.key)) || 0;
+    const kg = Number(getProductValue(order, p.kgKey)) || 0;
+    if (trays <= 0 && kg <= 0) return;
+
+    const unit = getReceiptUnitPrices(p.key, prices);
+    const lineTotal = (trays * unit.tray) + (kg * unit.kg);
+    const qty = [];
+    if (trays > 0) qty.push(`${trays} Tepsi`);
+    if (kg > 0) qty.push(`${fmtKg(kg)} Kg`);
+
+    rows.push({
+      label: `${stripEmojis(p.label || p.key)} (${qty.join(' + ')})`,
+      amount: Math.round(lineTotal * 100) / 100
+    });
+  });
+
+  return rows;
+}
+
+function buildReceiptDepositSummary(order) {
+  let baklavaTepsiCount = 0;
+  let ziniTepsiCount = 0;
+
+  PRODUCTS.forEach(p => {
+    const trays = Number(getProductValue(order, p.key)) || 0;
+    if (trays <= 0) return;
+
+    if (p.key === 'suBoregi') {
+      ziniTepsiCount += trays;
+      return;
+    }
+
+    if (p.key === 'yufka') return;
+    baklavaTepsiCount += trays;
+  });
+
+  const prices = globalPriceSettings || window.currentPrices || {};
+  const baklavaDepositUnit = Number(prices.baklavaTepsiDeposit ?? prices.baklavaDepozito ?? 0);
+  const ziniDepositUnit = Number(prices.ziniTepsiDeposit ?? prices.ziniDepozito ?? 0);
+  const baklavaTotal = baklavaTepsiCount * baklavaDepositUnit;
+  const ziniTotal = ziniTepsiCount * ziniDepositUnit;
+  const totalDeposit = baklavaTotal + ziniTotal;
+
+  return {
+    baklavaTepsiCount,
+    ziniTepsiCount,
+    baklavaTotal,
+    ziniTotal,
+    totalDeposit
+  };
+}
+
+function formatReceiptDateValue(value) {
+  if (!value) return '-';
+
+  let date = null;
+  if (value instanceof Date) {
+    date = value;
+  } else if (value && typeof value.toDate === 'function') {
+    date = value.toDate();
+  } else if (typeof value === 'object' && typeof value.seconds === 'number') {
+    date = new Date(value.seconds * 1000);
+  } else {
+    date = new Date(value);
+  }
+
+  if (!date || Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleString('tr-TR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function getReceiptOrderIdentifier(order, fallbackOrderId) {
+  const explicitOrderNo = order?.orderNo || order?.orderNumber || order?.siparisNo;
+  if (explicitOrderNo) return String(explicitOrderNo);
+
+  const rawId = String(fallbackOrderId || order?.id || '');
+  if (!rawId) return '-';
+  return rawId.slice(-5).toUpperCase();
+}
+
+function printReceipt(orderId) {
+  if (!orderId) return;
+
+  const order = (ordersCache || []).find(o => o.id === orderId) || (deliveredCache || []).find(o => o.id === orderId);
+  if (!order) {
+    toast('Sipariş bulunamadı!', 'error');
+    return;
+  }
+
+  const receiptEl = document.getElementById('pos-receipt');
+  const orderIdEl = document.getElementById('r-order-id');
+  const createdDateEl = document.getElementById('r-created-date');
+  const deliveryDateEl = document.getElementById('r-delivery-date');
+  const userEl = document.getElementById('r-user');
+  const printDateEl = document.getElementById('r-print-date');
+  const customerEl = document.getElementById('receipt-customer');
+  const phoneEl = document.getElementById('r-phone');
+  const noteContainerEl = document.getElementById('r-note-container');
+  const noteEl = document.getElementById('r-note');
+  const itemsEl = document.getElementById('r-items');
+  const depositsEl = document.getElementById('r-deposits');
+  const totalEl = document.getElementById('r-total');
+
+  if (!receiptEl || !orderIdEl || !createdDateEl || !deliveryDateEl || !userEl || !printDateEl || !customerEl || !phoneEl || !noteContainerEl || !noteEl || !itemsEl || !depositsEl || !totalEl) {
+    toast('Fiş şablonu bulunamadı!', 'error');
+    return;
+  }
+
+  const printDateText = new Date().toLocaleString('tr-TR');
+  const createdDateRaw = order?.orderCreatedAt ?? order?.createdAt ?? order?.createdDate ?? order?.createdByDate;
+  const orderUser = order?.createdBy || order?.addedBy || order?.createdByEmail || auth?.currentUser?.email || '-';
+
+  orderIdEl.textContent = getReceiptOrderIdentifier(order, orderId);
+  createdDateEl.textContent = formatReceiptDateValue(createdDateRaw);
+  deliveryDateEl.textContent = order?.deliveryDate ? fmtDate(order.deliveryDate) : '-';
+  userEl.textContent = orderUser;
+  printDateEl.textContent = printDateText;
+
+  customerEl.textContent = order.customerName || '-';
+  phoneEl.textContent = order.phoneNumber || '-';
+
+  const noteValue = String(order.note || '').trim();
+  if (noteValue) {
+    noteContainerEl.classList.remove('hidden');
+    noteEl.textContent = noteValue;
+  } else {
+    noteContainerEl.classList.add('hidden');
+    noteEl.textContent = '';
+  }
+
+  const itemRows = buildReceiptItemRows(order);
+  if (itemRows.length) {
+    itemsEl.innerHTML = itemRows.map(row => `
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:4px; margin-bottom:2px; line-height:1.15;">
+        <div style="flex:1; min-width:0;">${escHtml(row.label)}</div>
+        <div style="white-space:nowrap; font-weight:600;">${row.amount.toLocaleString('tr-TR')} ₺</div>
+      </div>
+    `).join('');
+  } else {
+    itemsEl.innerHTML = '<div>Urun bilgisi yok</div>';
+  }
+
+  const deposit = buildReceiptDepositSummary(order);
+  if (deposit.totalDeposit > 0) {
+    depositsEl.classList.remove('hidden');
+    depositsEl.innerHTML = `
+      <div style="font-weight:700; margin-bottom:1px; line-height:1.15;">Tepsi Depozito Özeti:</div>
+      ${deposit.baklavaTepsiCount > 0 ? `<div>Baklava Tepsisi (${deposit.baklavaTepsiCount}x): ₺${deposit.baklavaTotal.toLocaleString('tr-TR')}</div>` : ''}
+      ${deposit.ziniTepsiCount > 0 ? `<div>Zini (${deposit.ziniTepsiCount}x): ₺${deposit.ziniTotal.toLocaleString('tr-TR')}</div>` : ''}
+    `;
+  } else {
+    depositsEl.classList.add('hidden');
+    depositsEl.innerHTML = '';
+  }
+
+  totalEl.textContent = `${getOrderReceiptTotal(order).toLocaleString('tr-TR')} ₺`;
+
+  window.print();
 }
 
 
