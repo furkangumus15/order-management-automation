@@ -263,6 +263,58 @@
     .animate-fade-up {
       animation: fadeUp 0.5s ease-out forwards;
     }
+
+    @media print {
+      @page {
+        margin: 0;
+      }
+
+      body * {
+        visibility: hidden;
+      }
+
+      #pos-receipt,
+      #pos-receipt * {
+        visibility: visible;
+      }
+
+      #pos-receipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80mm;
+        padding: 3mm;
+        margin: 0;
+        font-family: monospace;
+        font-size: 11px;
+        color: black;
+        background: white;
+        line-height: 1.15;
+      }
+
+      #pos-receipt .mb-2,
+      #pos-receipt .mb-3,
+      #pos-receipt .mb-4,
+      #pos-receipt .pb-2,
+      #pos-receipt .pb-3,
+      #pos-receipt .py-2 {
+        margin-bottom: 2px !important;
+        padding-bottom: 2px !important;
+        padding-top: 2px !important;
+      }
+
+      #pos-receipt > div {
+        margin-bottom: 4px !important;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      #pos-receipt.hidden {
+        display: block !important;
+      }
+    }
   </style>
 </head>
 
@@ -1608,6 +1660,48 @@
     </div>
   </div>
 
+  <div id="pos-receipt" class="hidden">
+    <div style="border-bottom:1px dashed #000; padding-bottom:4px; margin-bottom:4px; text-align:center;">
+      <div style="font-size:15px; font-weight:700; letter-spacing:0.4px; line-height:1.0;">SOFUOĞLU</div>
+      <div style="font-size:15px; font-weight:700; letter-spacing:0.4px; line-height:1.0; margin-bottom:3px;">BAKLAVALARI</div>
+      <div style="font-size:11px;">Sipariş No: <span id="r-order-id">-</span></div>
+    </div>
+
+    <div style="border-bottom:1px dashed #000; padding:3px 0; margin-bottom:4px; font-size:10.5px;">
+      <div style="display:flex; justify-content:space-between; gap:8px;"><span>Sipariş Alım Tarihi:</span><span id="r-created-date">-</span></div>
+      <div style="display:flex; justify-content:space-between; gap:8px;"><span>Teslim Edilme Tarihi:</span><span id="r-delivery-date">-</span></div>
+      <div style="display:flex; justify-content:space-between; gap:8px;"><span>İşlemi Yapan Şahıs:</span><span id="r-user">-</span></div>
+      <div style="display:flex; justify-content:space-between; gap:8px;"><span>Fiş Çıkartma Saati:</span><span id="r-print-date">-</span></div>
+    </div>
+
+    <div style="border-bottom:1px dashed #000; padding:3px 0; margin-bottom:4px; font-size:11px;">
+      <div style="margin-bottom:2px;"><strong>Müşteri:</strong> <span id="receipt-customer">-</span></div>
+      <div style="margin-bottom:2px;"><strong>Telefon:</strong> <span id="r-phone">-</span></div>
+      <div id="r-note-container" class="hidden"><strong>Not:</strong> <span id="r-note">-</span></div>
+    </div>
+
+    <div style="border-bottom:1px dashed #000; padding-bottom:4px; margin-bottom:4px;">
+      <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700; border-bottom:1px dashed #000; padding-bottom:2px; margin-bottom:3px;">
+        <span>ÜRÜNLER</span>
+        <span>TUTAR</span>
+      </div>
+
+      <div id="r-items" style="font-size:11px; margin-bottom:3px;"></div>
+
+      <div id="r-deposits" class="hidden" style="font-size:11px; text-align:right;"></div>
+    </div>
+
+    <div style="border-bottom:1px dashed #000; padding:4px 0; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700;">
+      <span>GENEL TOPLAM:</span>
+      <span id="r-total">0 ₺</span>
+    </div>
+
+    <div style="text-align:center; font-size:10.5px; line-height:1.15;">
+      <div>Afiyet Olsun! Lütfen bu fişi saklayınız.</div>
+      <div>İletişim: 0248 502 11 11</div>
+    </div>
+  </div>
+  
 </body>
 
 </html>
