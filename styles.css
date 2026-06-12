@@ -399,7 +399,10 @@ tbody tr {
     body {
         background: white;
     }
-    
+    @page {
+        size: 80mm auto;
+        margin: 0;
+    }
     .form-container,
     .btn {
         display: none;
