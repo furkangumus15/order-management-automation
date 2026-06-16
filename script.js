@@ -161,13 +161,17 @@ function loadOrders() {
         // O tarihteki tüm siparişleri göster
         dateOrders.forEach(order => {
             const row = document.createElement('tr');
+            const branchName = order.branch || order.sube || 'Şirinevler';
+            const branchBadgeClass = branchName === 'Toki'
+                ? 'bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold'
+                : 'bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-xs font-bold';
             const kbKg = (order.kareBaklavaKg || 0);
             const ebKg = (order.evBaklavasiKg || 0);
             const sbKg = (order.sariBurmaKg || 0);
             const suKg = (order.suBoregiKg || 0);
 
             row.innerHTML = `
-                <td>${escHtml(order.customerName)}</td>
+                <td><div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><span>${escHtml(order.customerName)}</span><span class="${branchBadgeClass}">${escHtml(branchName)}</span></div></td>
                 <td>${escHtml(order.phoneNumber)}</td>
                 <td>${order.kareBaklava > 0 ? order.kareBaklava : '-'}</td>
                 <td>${kbKg > 0 ? kbKg : '-'}</td>
@@ -244,9 +248,13 @@ function loadDeliveredOrders() {
         // ✅ TEPSİ İADE DURUMUNU KONTROL ET
         const trayStatus = order.trayReturned ? 'İade Alındı ✅' : 'Bekleniyor ⏳';
         const trayBadgeClass = order.trayReturned ? 'status-alindi' : 'status-alinmadi';
+        const branchName = order.branch || order.sube || 'Şirinevler';
+        const branchBadgeClass = branchName === 'Toki'
+            ? 'bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold'
+            : 'bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-xs font-bold';
 
         row.innerHTML = `
-            <td>${escHtml(order.customerName)}</td>
+            <td><div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;"><span>${escHtml(order.customerName)}</span><span class="${branchBadgeClass}">${escHtml(branchName)}</span></div></td>
             <td>${escHtml(order.phoneNumber)}</td>
             <td>${order.kareBaklava > 0 ? order.kareBaklava : '-'}</td>
             <td>${order.evBaklavasi > 0 ? order.evBaklavasi : '-'}</td>
