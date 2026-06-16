@@ -98,6 +98,24 @@ window.deleteUser = async function (userId) {
     return;
   }
 
+  if (String(userId) === String(auth.currentUser?.uid)) {
+    toast('❌ Güvenlik: Kendi hesabınızı silemezsiniz!', 'error');
+    return;
+  }
+
+  try {
+    const targetDoc = await db.collection('users').doc(String(userId)).get();
+    const targetEmail = targetDoc.exists ? String(targetDoc.data()?.email || '') : '';
+    if (targetEmail === 'admin@sofuoglu.com' || targetEmail === 'patron@sofuoglu.com') {
+      toast('❌ Güvenlik: Ana yönetici hesapları silinemez!', 'error');
+      return;
+    }
+  } catch (err) {
+    console.error('❌ Kullanıcı doğrulama hatası:', err);
+    toast('❌ Güvenlik kontrolü başarısız. Silme işlemi iptal edildi.', 'error');
+    return;
+  }
+
   const result = await window.Swal.fire({
     title: 'Kullanıcıyı Sil?',
     text: 'Bu hesabı silmek istediğinize emin misiniz? (Bu işlem geri alınamaz)',
@@ -501,6 +519,7 @@ let dateFilterValue = '';
 let dateFilterValueDelivered = '';
 let dateFilterValueTray = '';
 let historyTrayFilterValue = 'all';
+let dashboardBranchFilter = 'Tümü';
 let editingId = null;
 let hasModalChanges = false;
 
@@ -640,6 +659,7 @@ function initAuthGuard() {
           setCurrentDate();
           buildProductRows();
           setupMobileMenu();
+          bindDashboardBranchFilters();
           bindSidebar();
           bindSearch();
           if (typeof loadSettings === 'function') await loadSettings();
@@ -782,6 +802,20 @@ function renderDeletedPanel() {
   currentPanel = 'deleted';
   const container = document.getElementById('deleted-list');
   if (!container) return;
+
+  // PERSONEL GİZLİLİK FİLTRESİ
+  if (!isPrivilegedUser(auth.currentUser?.email)) {
+    const searchTerm = (document.getElementById('search-text-deleted')?.value || '').trim();
+
+    if (searchTerm.length < 2) {
+      const container = document.getElementById('deleted-list');
+      if (container) {
+        container.innerHTML = '<div class="text-center py-16 text-gray-500"><div class="text-5xl mb-3">🔒</div><p class="text-sm font-medium">Güvenlik nedeniyle liste gizlenmiştir.</p><p class="text-xs mt-1 text-gray-400">Kayıtları görmek için müşteri adı veya telefon numarası aratın.</p></div>';
+      }
+      return;
+    }
+  }
+
   const { headerBgClass, panelBadgeClass, panelBadgeLabel } = getPanelTheme('deleted');
 
   if (!deletedCache.length) {
@@ -854,6 +888,7 @@ function renderDeletedPanel() {
                   class="w-full px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 flex items-center justify-center gap-2 font-semibold text-sm transition-colors cursor-pointer">
                   🔄 Geri Yükle
                 </button>
+                <button data-action="print" data-order-id="${o.id}" class="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition">🖨️ Fiş Çıkar</button>
                 ${(currentUserDoc && (currentUserDoc.role === 'admin' || currentUserDoc.isDeveloper === true)) ? `
                 <button onclick="hardDeleteOrder('${o.id}')"
                   class="w-full px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 flex items-center justify-center gap-2 font-semibold text-sm transition-colors cursor-pointer">
@@ -886,6 +921,20 @@ function renderDeletedPanelFiltered(list) {
   currentPanel = 'deleted';
   const container = document.getElementById('deleted-list');
   if (!container) return;
+
+  // PERSONEL GİZLİLİK FİLTRESİ
+  if (!isPrivilegedUser(auth.currentUser?.email)) {
+    const searchTerm = (document.getElementById('search-text-deleted')?.value || '').trim();
+
+    if (searchTerm.length < 2) {
+      const container = document.getElementById('deleted-list');
+      if (container) {
+        container.innerHTML = '<div class="text-center py-16 text-gray-500"><div class="text-5xl mb-3">🔒</div><p class="text-sm font-medium">Güvenlik nedeniyle liste gizlenmiştir.</p><p class="text-xs mt-1 text-gray-400">Kayıtları görmek için müşteri adı veya telefon numarası aratın.</p></div>';
+      }
+      return;
+    }
+  }
+
   const { headerBgClass, panelBadgeClass, panelBadgeLabel } = getPanelTheme('deleted');
 
   const data = Array.isArray(list) ? list : [];
@@ -958,6 +1007,7 @@ function renderDeletedPanelFiltered(list) {
                   class="w-full px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 flex items-center justify-center gap-2 font-semibold text-sm transition-colors cursor-pointer">
                   🔄 Geri Yükle
                 </button>
+                <button data-action="print" data-order-id="${o.id}" class="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition">🖨️ Fiş Çıkar</button>
                 ${(currentUserDoc && (currentUserDoc.role === 'admin' || currentUserDoc.isDeveloper === true)) ? `
                 <button onclick="hardDeleteOrder('${o.id}')"
                   class="w-full px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 flex items-center justify-center gap-2 font-semibold text-sm transition-colors cursor-pointer">` : ''}
@@ -1009,7 +1059,9 @@ function bindModalEventListeners() {
   if (cancelOrderBtn && typeof closeModal === 'function') cancelOrderBtn.addEventListener('click', closeModal);
 
   const saveOrderBtn = document.getElementById('saveOrderBtn');
-  if (saveOrderBtn && typeof submitOrder === 'function') saveOrderBtn.addEventListener('click', submitOrder);
+  const saveAndPrintBtn = document.getElementById('saveAndPrintBtn');
+  if (saveOrderBtn && typeof submitOrder === 'function') saveOrderBtn.addEventListener('click', () => submitOrder(false));
+  if (saveAndPrintBtn && typeof submitOrder === 'function') saveAndPrintBtn.addEventListener('click', () => submitOrder(true));
 
   // Canlı fiyat önizlemesi için input event'lerini bağla (number + checkbox)
   const modalInputs = document.querySelectorAll('#orderModal input[type="number"], #orderModal input[type="checkbox"]');
@@ -1990,6 +2042,18 @@ window.updateFinancialSummary = function () {
   // 2️⃣ Toplam Ciro (teslim edilen siparişler)
   const totalRevenue = deliveredInRange.reduce((sum, o) => sum + getOrderTotal(o), 0);
 
+  let totalNakit = 0;
+  let totalPOS = 0;
+  deliveredInRange.forEach(o => {
+    const amt = getOrderTotal(o);
+    const method = String(o.paymentMethod || '').toLowerCase();
+    if (method.includes('kredi') || method.includes('pos')) {
+      totalPOS += amt;
+    } else {
+      totalNakit += amt;
+    }
+  });
+
   // 3️⃣ Bekleyen Tahsilat (aktif siparişlerin gözlemleme - burada henüz ödenmeyen tutar)
   // Seçili tarih aralığında "delivery date" <= endDate olan aktif siparişler
   const activePending = ordersCache.filter(o =>
@@ -2057,6 +2121,11 @@ window.updateFinancialSummary = function () {
   document.getElementById('finance-total-orders').textContent =
     `${deliveredInRange.length} sipariş`;
 
+  const elNakit = document.getElementById('finance-nakit');
+  const elPos = document.getElementById('finance-pos');
+  if (elNakit) elNakit.textContent = `₺ ${totalNakit.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  if (elPos) elPos.textContent = `₺ ${totalPOS.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+
   document.getElementById('finance-pending-collection').textContent =
     `₺ ${pendingCollection.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   document.getElementById('finance-pending-orders').textContent =
@@ -2116,6 +2185,8 @@ window.clearFinancialUI = function () {
   try {
     const elTotal = document.getElementById('finance-total-revenue'); if (elTotal) elTotal.textContent = zero;
     const elTotalOrders = document.getElementById('finance-total-orders'); if (elTotalOrders) elTotalOrders.textContent = zeroCount;
+    const elFinanceNakit = document.getElementById('finance-nakit'); if (elFinanceNakit) elFinanceNakit.textContent = '₺ 0';
+    const elFinancePos = document.getElementById('finance-pos'); if (elFinancePos) elFinancePos.textContent = '₺ 0';
     const elPending = document.getElementById('finance-pending-collection'); if (elPending) elPending.textContent = zero;
     const elPendingOrders = document.getElementById('finance-pending-orders'); if (elPendingOrders) elPendingOrders.textContent = zeroCount;
     const elNet = document.getElementById('finance-net-cash'); if (elNet) elNet.textContent = zero;
@@ -2192,7 +2263,12 @@ function calculateFinance() {
 
 // ─── Dashboard Özet Grid ─────────────────────────────────────────
 function renderSummaryGrid() {
-  const totals = calcTotals(ordersCache);
+  let summaryOrders = ordersCache;
+  if (dashboardBranchFilter !== 'Tümü') {
+    summaryOrders = summaryOrders.filter(o => (o.branch || 'Şirinevler') === dashboardBranchFilter);
+  }
+
+  const totals = calcTotals(summaryOrders);
   document.getElementById('summaryGrid').innerHTML = PRODUCTS.map((p, i) => {
     const adet = totals[p.key] || 0;
     const kg = totals[p.kgKey] || 0;
@@ -2215,6 +2291,38 @@ function renderSummaryGrid() {
   }).join('');
 }
 
+function updateDashboardBranchButtons() {
+  const buttons = document.querySelectorAll('[data-dashboard-branch]');
+  buttons.forEach((button) => {
+    const isActive = button.dataset.dashboardBranch === dashboardBranchFilter;
+    button.classList.toggle('bg-slate-800', isActive);
+    button.classList.toggle('text-white', isActive);
+    button.classList.toggle('shadow-md', isActive);
+    button.classList.toggle('text-gray-600', !isActive);
+    button.classList.toggle('hover:text-gray-800', !isActive);
+    button.classList.toggle('hover:bg-gray-50', !isActive);
+  });
+}
+
+function setDashboardBranchFilter(branchName) {
+  dashboardBranchFilter = branchName || 'Tümü';
+  updateDashboardBranchButtons();
+  renderSummaryGrid();
+}
+
+function bindDashboardBranchFilters() {
+  const buttons = document.querySelectorAll('[data-dashboard-branch]');
+  if (!buttons.length) return;
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      setDashboardBranchFilter(button.dataset.dashboardBranch || 'Tümü');
+    });
+  });
+
+  updateDashboardBranchButtons();
+}
+
 
 // ─── Aktif Siparişler Tablosu (Accordion Mobile) ──────────────────
 function renderActiveTable() {
@@ -2223,6 +2331,21 @@ function renderActiveTable() {
   let filtered = filterOrders(ordersCache, searchActive);
   if (dateFilterValue) {
     filtered = filtered.filter(o => o.deliveryDate === dateFilterValue);
+  }
+
+  // PERSONEL GİZLİLİK FİLTRESİ
+  // Eğer kullanıcı admin değilse ve arama kutusuna en az 2 karakter girilmemişse (veya tarih filtresi seçilmemişse) listeyi gizle.
+  if (!isPrivilegedUser(auth.currentUser?.email)) {
+    const searchTerm = currentPanel === 'active' ? searchActive : searchHistory;
+    const currentFilterDate = currentPanel === 'active' ? dateFilterValue : dateFilterValueDelivered;
+
+    if (searchTerm.trim().length < 2 && !currentFilterDate) {
+      const tbody = document.getElementById(currentPanel === 'active' ? 'active-list' : 'history-list') || document.getElementById(currentPanel === 'active' ? 'activeTableBody' : 'historyTableBody');
+      if (tbody) {
+        tbody.innerHTML = '<div class="text-center py-16 text-gray-500"><div class="text-5xl mb-3">🔒</div><p class="text-sm font-medium">Güvenlik nedeniyle liste gizlenmiştir.</p><p class="text-xs mt-1 text-gray-400">Siparişi görmek için müşteri adı veya telefon numarası aratın.</p></div>';
+      }
+      return;
+    }
   }
 
   if (!filtered.length) {
@@ -2297,11 +2420,18 @@ function renderActiveTable() {
     let cardsHtml = '';
     grouped[dateKey].sort((a, b) => a.customerName.localeCompare(b.customerName, 'tr')).forEach(o => {
       const productsHtml = generateProductsHtml(o);
+      const branchName = o.branch || o.sube || 'Şirinevler';
+      const branchBadgeClass = branchName === 'Toki'
+        ? 'bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold'
+        : 'bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-xs font-bold';
 
       cardsHtml += `
         <div class="w-full block p-0 border-b border-blue-100">
           <div class="flex justify-between items-center w-full py-3 px-4 font-bold text-gray-800 cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors" onclick="toggleDetails('act-${o.id}')">
-            <span>${escHtml(o.customerName)}</span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span>${escHtml(o.customerName)}</span>
+              <span class="inline-flex items-center ${branchBadgeClass}">${escHtml(branchName)}</span>
+            </div>
             <span class="toggle-arrow" style="transform: rotate(0deg); transition: transform 0.3s ease;">▼</span>
           </div>
 
@@ -2331,7 +2461,7 @@ function renderActiveTable() {
                 <button type="button" class="w-full px-3 py-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="whatsapp" data-order-id="${o.id}" data-msg-type="reminder">
                   📱 Hatırlat
                 </button>
-                <button type="button" class="w-full px-3 py-1.5 bg-slate-700 text-white rounded-md hover:bg-slate-800 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="printReceipt" data-order-id="${o.id}">🖨️ Fiş Çıkar</button>
+                <button data-action="print" data-order-id="${o.id}" class="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition">🖨️ Fiş Çıkar</button>
                 <button class="w-full px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-md hover:bg-blue-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="edit" data-order-id="${o.id}">✏️ Güncelle</button>
                 <button class="w-full px-4 py-2 bg-green-50 text-green-600 border border-green-200 rounded-md hover:bg-green-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="deliver" data-order-id="${o.id}">✅ Teslim Et</button>
                 <button class="w-full px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="delete" data-order-id="${o.id}">🗑️ Sil</button>
@@ -2380,7 +2510,7 @@ function handleButtonClick(e) {
   else if (action === 'deleteDelivered') deleteDeliveredOrder(orderId);
   else if (action === 'markTrayReturned') markTrayReturned(orderId);
   else if (action === 'revertTrayReturn') revertTrayReturn(orderId);
-  else if (action === 'printReceipt') printReceipt(orderId);
+  else if (action === 'printReceipt' || action === 'print') printReceipt(orderId);
   else if (action === 'whatsapp') {
     const msgType = this.dataset.msgType;
     handleWhatsAppClick(orderId, msgType);
@@ -2396,6 +2526,21 @@ function renderHistoryTable(filteredData = null) {
   let filtered = filteredData !== null ? filteredData : filterOrders(deliveredCache, searchHistory);
   if (filteredData === null && dateFilterValueDelivered) {
     filtered = filtered.filter(o => o.deliveryDate === dateFilterValueDelivered);
+  }
+
+  // PERSONEL GİZLİLİK FİLTRESİ
+  // Eğer kullanıcı admin değilse ve arama kutusuna en az 2 karakter girilmemişse (veya tarih filtresi seçilmemişse) listeyi gizle.
+  if (!isPrivilegedUser(auth.currentUser?.email)) {
+    const searchTerm = currentPanel === 'active' ? searchActive : searchHistory;
+    const currentFilterDate = currentPanel === 'active' ? dateFilterValue : dateFilterValueDelivered;
+
+    if (searchTerm.trim().length < 2 && !currentFilterDate) {
+      const tbody = document.getElementById(currentPanel === 'active' ? 'active-list' : 'history-list') || document.getElementById(currentPanel === 'active' ? 'activeTableBody' : 'historyTableBody');
+      if (tbody) {
+        tbody.innerHTML = '<div class="text-center py-16 text-gray-500"><div class="text-5xl mb-3">🔒</div><p class="text-sm font-medium">Güvenlik nedeniyle liste gizlenmiştir.</p><p class="text-xs mt-1 text-gray-400">Siparişi görmek için müşteri adı veya telefon numarası aratın.</p></div>';
+      }
+      return;
+    }
   }
 
   if (!filtered.length) {
@@ -2456,11 +2601,18 @@ function renderHistoryTable(filteredData = null) {
     let cardsHtml = '';
     grouped[dateKey].forEach(o => {
       const productsHtml = generateProductsHtml(o);
+      const branchName = o.branch || o.sube || 'Şirinevler';
+      const branchBadgeClass = branchName === 'Toki'
+        ? 'bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold'
+        : 'bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-xs font-bold';
 
       cardsHtml += `
         <div class="w-full block p-0 border-b border-emerald-100">
           <div class="flex justify-between items-center w-full py-3 px-4 font-bold text-gray-800 cursor-pointer bg-emerald-50 hover:bg-emerald-100 transition-colors" onclick="toggleDetails('hist-${o.id}')">
-            <span>${escHtml(o.customerName)}</span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span>${escHtml(o.customerName)}</span>
+              <span class="inline-flex items-center ${branchBadgeClass}">${escHtml(branchName)}</span>
+            </div>
             <span class="toggle-arrow" style="transform: rotate(0deg); transition: transform 0.3s ease;">▼</span>
           </div>
 
@@ -2496,9 +2648,7 @@ function renderHistoryTable(filteredData = null) {
                   <i class="fas fa-bell"></i> Tepsi İste
                 </button>
                 ` : ''}
-                <button type="button" class="w-full px-3 py-1.5 bg-slate-700 text-white rounded-md hover:bg-slate-800 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer" data-action="printReceipt" data-order-id="${o.id}">
-                  🖨️ Fiş Çıkar
-                </button>
+                <button data-action="print" data-order-id="${o.id}" class="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition">🖨️ Fiş Çıkar</button>
                 <button onclick="revertToActive('${o.id}')" class="w-full px-4 py-2 bg-orange-50 text-orange-600 border border-orange-200 rounded-md hover:bg-orange-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer">
                   ↩️ Geri Al
                 </button>
@@ -2604,10 +2754,12 @@ function openModal(orderId) {
   editingId = orderId;
   const isNew = orderId === null;
   document.getElementById('modalTitle').textContent = isNew ? 'Yeni Sipariş Ekle' : 'Siparişi Güncelle';
+  const branchSelect = document.getElementById('branch-select');
 
   if (isNew) {
     document.getElementById('fName').value = '';
     document.getElementById('fPhone').value = '';
+    if (branchSelect) branchSelect.value = 'Şirinevler';
     document.getElementById('fDate').value = '';
     document.getElementById('order-note').value = '';
     PRODUCTS.forEach(p => { document.getElementById('f_' + p.key).value = ''; document.getElementById('f_' + p.kgKey).value = ''; });
@@ -2616,6 +2768,7 @@ function openModal(orderId) {
     if (!o) return;
     document.getElementById('fName').value = o.customerName;
     document.getElementById('fPhone').value = o.phoneNumber;
+    if (branchSelect) branchSelect.value = o.branch || o.sube || 'Şirinevler';
     document.getElementById('fDate').value = o.deliveryDate;
     document.getElementById('order-note').value = o.note || '';
     PRODUCTS.forEach(p => {
@@ -2631,7 +2784,7 @@ function openModal(orderId) {
   }
 
   // ✅ Form değişikliklerini izlemek için listener ekle
-  const formInputs = document.querySelectorAll('#fName, #fPhone, #fDate, #order-note, [id^="f_"]');
+  const formInputs = document.querySelectorAll('#fName, #fPhone, #branch-select, #fDate, #order-note, [id^="f_"]');
   formInputs.forEach(input => {
     input.addEventListener('change', () => { hasModalChanges = true; });
     input.addEventListener('input', () => { hasModalChanges = true; });
@@ -2670,7 +2823,7 @@ function closeModal() {
   editingId = null;
 }
 
-async function submitOrder() {
+async function submitOrder(shouldPrint = false) {
   const name = document.getElementById('fName').value.trim();
   const phone = document.getElementById('fPhone').value.trim();
   const date = document.getElementById('fDate').value;
@@ -2734,6 +2887,7 @@ async function submitOrder() {
   const payload = {
     customerName: name,
     phoneNumber: phone,
+    branch: document.getElementById('branch-select').value,
     deliveryDate: date,
     note: document.getElementById('order-note').value.trim(),
     totalPrice: calculatedTotal,
@@ -2742,19 +2896,33 @@ async function submitOrder() {
   };
 
   const saveBtn = document.getElementById('saveOrderBtn');
+  const saveAndPrintBtn = document.getElementById('saveAndPrintBtn');
+  let success = false;
+  let savedOrderId = null;
+  let savedOrderData = null;
+
   if (saveBtn) {
     saveBtn.disabled = true;
     saveBtn.innerHTML = 'Kaydediliyor...';
   }
+  if (saveAndPrintBtn) {
+    saveAndPrintBtn.disabled = true;
+    saveAndPrintBtn.innerHTML = 'Kaydediliyor...';
+  }
 
   try {
     if (editingId === null) {
-      await addOrderFS(payload);
+      const result = await addOrderFS(payload);
+      savedOrderId = result.id;
+      savedOrderData = { id: result.id, ...payload };
       toast('✅ Sipariş başarıyla eklendi!', 'success');
     } else {
       await updateOrderFS(editingId, payload);
+      savedOrderId = editingId;
+      savedOrderData = { id: editingId, ...payload };
       toast('✏️ Sipariş güncellendi!', 'success');
     }
+    success = true;
     hasModalChanges = false;
     document.getElementById('fName').value = '';
     document.getElementById('fPhone').value = '';
@@ -2770,11 +2938,17 @@ async function submitOrder() {
   } finally {
     if (saveBtn) {
       saveBtn.disabled = false;
-      saveBtn.innerHTML = 'Kaydet';
+      saveBtn.innerHTML = 'Sadece Kaydet';
     }
-    // ✅ KESİNLİKLE modal kapanır
+    if (saveAndPrintBtn) {
+      saveAndPrintBtn.disabled = false;
+      saveAndPrintBtn.innerHTML = '🖨️ Kaydet ve Yazdır';
+    }
     closeModal();
     hideLoader();
+    if (shouldPrint && success && savedOrderId) {
+      printReceipt(savedOrderId, savedOrderData);
+    }
   }
 }
 
@@ -2998,7 +3172,10 @@ async function openCheckoutModal(orderId, order) {
         trayStatus = 'not_received';
       }
 
-      await confirmCheckout(orderId, order, trayStatus, currentFinalAmount);
+      const paymentRadio = document.querySelector('input[name="paymentMethod"]:checked');
+      const paymentMethod = paymentRadio ? paymentRadio.value : 'Nakit';
+
+      await confirmCheckout(orderId, order, trayStatus, currentFinalAmount, paymentMethod);
     };
 
     // Modal'ı aç
@@ -3017,7 +3194,7 @@ function closeCheckoutModal() {
 }
 
 // ─── Kasayı Onayla ve Teslim Et ─────────────────────────────
-async function confirmCheckout(orderId, order, trayStatus, finalAmount) {
+async function confirmCheckout(orderId, order, trayStatus, finalAmount, paymentMethod = 'Nakit') {
   showLoader();
   try {
     // ════════════════════════════════════════════════════════════
@@ -3051,6 +3228,7 @@ async function confirmCheckout(orderId, order, trayStatus, finalAmount) {
     updatedOrder.deliveredAt = new Date().toISOString();
     updatedOrder.trayReturned = false;
     updatedOrder.trayReturnedDate = null;
+    updatedOrder.paymentMethod = paymentMethod;
 
     // Attach the pre-delivery snapshot so undo can restore the original state
     try {
@@ -3067,8 +3245,8 @@ async function confirmCheckout(orderId, order, trayStatus, finalAmount) {
     // ════════════════════════════════════════════════════════════
     const batch = db.batch();
     batch.delete(db.collection('orders').doc(orderId));
-    // Save delivered document including preDeliverySnapshot
-    batch.set(db.collection('deliveredOrders').doc(), updatedOrder);
+    const deliveredRef = db.collection('deliveredOrders').doc();
+    batch.set(deliveredRef, updatedOrder);
     await batch.commit();
 
     console.log('✅ Sipariş teslim edildi:', orderId);
@@ -3082,6 +3260,15 @@ async function confirmCheckout(orderId, order, trayStatus, finalAmount) {
 
     // Modal'ı kapat
     closeCheckoutModal();
+
+    const deliveredOrder = { id: deliveredRef.id, ...updatedOrder };
+    setTimeout(() => {
+      if (typeof printDoubleReceipt === 'function') {
+        printDoubleReceipt(deliveredRef.id, deliveredOrder);
+      } else if (typeof printReceipt === 'function') {
+        printReceipt(deliveredRef.id, deliveredOrder);
+      }
+    }, 400);
 
   } catch (err) {
     console.error('❌ confirmCheckout hatası:', err);
@@ -3171,7 +3358,9 @@ function calculateTrayRefundBreakdown(order, settings = globalPriceSettings || {
       const isYufka = itemName.includes('yufka');
 
       if (isSuBoregi) {
-        ziniTepsiCount += trayCount;
+        if (order.trayDepositAdded !== false) {
+          ziniTepsiCount += trayCount;
+        }
       } else if (!isYufka) {
         baklavaTepsiCount += trayCount;
       }
@@ -3184,7 +3373,10 @@ function calculateTrayRefundBreakdown(order, settings = globalPriceSettings || {
     const fistikTepsi = Number(getProductValue(order, 'fistikliBaklava')) || 0;
 
     if (!orderOwnTray) {
-      ziniTepsiCount += suBoregiTepsi;
+      // Müşteri teslimatta tepsiyi getirdiyse (false), Zini depozitosu ödememiştir.
+      if (order.trayDepositAdded !== false) {
+        ziniTepsiCount += suBoregiTepsi;
+      }
       baklavaTepsiCount += kareTepsi + evTepsi + sariTepsi + fistikTepsi;
     }
   }
@@ -3280,6 +3472,20 @@ function renderTrayReturns() {
       return;
     }
 
+    // PERSONEL GİZLİLİK FİLTRESİ
+    if (!isPrivilegedUser(auth.currentUser?.email)) {
+      const searchTerm = (document.getElementById('search-text-tray')?.value || '').trim();
+      const currentFilterDate = (typeof dateFilterValueTray !== 'undefined' ? dateFilterValueTray : '') || document.getElementById('filter-date-tray')?.value;
+
+      if (searchTerm.length < 2 && !currentFilterDate) {
+        const container = document.getElementById('tray-returns-list');
+        if (container) {
+          container.innerHTML = '<div class="text-center py-16 text-gray-500"><div class="text-5xl mb-3">🔒</div><p class="text-sm font-medium">Güvenlik nedeniyle liste gizlenmiştir.</p><p class="text-xs mt-1 text-gray-400">Kayıtları görmek için müşteri adı veya telefon numarası aratın.</p></div>';
+        }
+        return;
+      }
+    }
+
     let trayReturned = deliveredCache.filter(o => o.trayReturned === true);
 
     // Tarih filtrelemesi
@@ -3348,6 +3554,7 @@ function renderTrayReturns() {
                   </button>
                   ` : ''}
                   <button type="button" onclick="revertTrayReturn('${o.id}')" class="w-full px-4 py-2 bg-orange-50 text-orange-600 border border-orange-200 rounded-md hover:bg-orange-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer">↩️ Geri Al</button>
+                  <button data-action="print" data-order-id="${o.id}" class="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition">🖨️ Fiş Çıkar</button>
                   <button type="button" onclick="deleteDeliveredOrder('${o.id}')" class="w-full px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer">🗑️ Sil</button>
                 </div>
               </div>
@@ -3390,6 +3597,20 @@ window.renderTrayReturnsFiltered = function (filteredData) {
     if (!container) {
       console.warn('⚠️ tray-returns-list container bulunamadı');
       return;
+    }
+
+    // PERSONEL GİZLİLİK FİLTRESİ
+    if (!isPrivilegedUser(auth.currentUser?.email)) {
+      const searchTerm = (document.getElementById('search-text-tray')?.value || '').trim();
+      const currentFilterDate = (typeof dateFilterValueTray !== 'undefined' ? dateFilterValueTray : '') || document.getElementById('filter-date-tray')?.value;
+
+      if (searchTerm.length < 2 && !currentFilterDate) {
+        const container = document.getElementById('tray-returns-list');
+        if (container) {
+          container.innerHTML = '<div class="text-center py-16 text-gray-500"><div class="text-5xl mb-3">🔒</div><p class="text-sm font-medium">Güvenlik nedeniyle liste gizlenmiştir.</p><p class="text-xs mt-1 text-gray-400">Kayıtları görmek için müşteri adı veya telefon numarası aratın.</p></div>';
+        }
+        return;
+      }
     }
 
     const trayReturned = filteredData;
@@ -3455,6 +3676,7 @@ window.renderTrayReturnsFiltered = function (filteredData) {
                   </button>
                   ` : ''}
                   <button type="button" onclick="revertTrayReturn('${o.id}')" class="w-full px-4 py-2 bg-orange-50 text-orange-600 border border-orange-200 rounded-md hover:bg-orange-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer">↩️ Geri Al</button>
+                  <button data-action="print" data-order-id="${o.id}" class="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition">🖨️ Fiş Çıkar</button>
                   <button type="button" onclick="deleteDeliveredOrder('${o.id}')" class="w-full px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-md hover:bg-red-100 flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md cursor-pointer">🗑️ Sil</button>
                 </div>
               </div>
@@ -3533,6 +3755,7 @@ window.loadSettings = loadSettings;
 window.updatePricePreview = updatePricePreview;
 window.calculateOrderTotal = calculateOrderTotal;
 window.printReceipt = printReceipt;
+window.printDoubleReceipt = printDoubleReceipt;
 
 // ─── Yedekleme Fonksiyonları Global Scope ───────────────────────
 window.generateBackupData = generateBackupData;
@@ -3720,7 +3943,9 @@ function generateProductsHtml(o) {
     if (adet <= 0) return;
 
     if (p.key === 'suBoregi') {
-      ziniTepsiCount += adet;
+      if (o.trayDepositAdded !== false) {
+        ziniTepsiCount += adet;
+      }
       return;
     }
 
@@ -3898,7 +4123,9 @@ function buildReceiptDepositSummary(order) {
     if (trays <= 0) return;
 
     if (p.key === 'suBoregi') {
-      ziniTepsiCount += trays;
+      if (order.trayDepositAdded !== false) {
+        ziniTepsiCount += trays;
+      }
       return;
     }
 
@@ -3955,15 +4182,7 @@ function getReceiptOrderIdentifier(order, fallbackOrderId) {
   return rawId.slice(-5).toUpperCase();
 }
 
-function printReceipt(orderId) {
-  if (!orderId) return;
-
-  const order = (ordersCache || []).find(o => o.id === orderId) || (deliveredCache || []).find(o => o.id === orderId);
-  if (!order) {
-    toast('Sipariş bulunamadı!', 'error');
-    return;
-  }
-
+function populatePosReceipt(order, orderId) {
   const receiptEl = document.getElementById('pos-receipt');
   const orderIdEl = document.getElementById('r-order-id');
   const createdDateEl = document.getElementById('r-created-date');
@@ -3976,11 +4195,11 @@ function printReceipt(orderId) {
   const noteEl = document.getElementById('r-note');
   const itemsEl = document.getElementById('r-items');
   const depositsEl = document.getElementById('r-deposits');
+  const branchEl = document.getElementById('r-branch');
   const totalEl = document.getElementById('r-total');
 
-  if (!receiptEl || !orderIdEl || !createdDateEl || !deliveryDateEl || !userEl || !printDateEl || !customerEl || !phoneEl || !noteContainerEl || !noteEl || !itemsEl || !depositsEl || !totalEl) {
-    toast('Fiş şablonu bulunamadı!', 'error');
-    return;
+  if (!receiptEl || !orderIdEl || !createdDateEl || !deliveryDateEl || !userEl || !printDateEl || !customerEl || !phoneEl || !noteContainerEl || !noteEl || !itemsEl || !depositsEl || !branchEl || !totalEl) {
+    return false;
   }
 
   const printDateText = new Date().toLocaleString('tr-TR');
@@ -3992,6 +4211,8 @@ function printReceipt(orderId) {
   deliveryDateEl.textContent = order?.deliveryDate ? fmtDate(order.deliveryDate) : '-';
   userEl.textContent = orderUser;
   printDateEl.textContent = printDateText;
+
+  branchEl.textContent = order.branch || 'Şirinevler';
 
   customerEl.textContent = order.customerName || '-';
   phoneEl.textContent = order.phoneNumber || '-';
@@ -4030,8 +4251,68 @@ function printReceipt(orderId) {
     depositsEl.innerHTML = '';
   }
 
-  totalEl.textContent = `${getOrderReceiptTotal(order).toLocaleString('tr-TR')} ₺`;
+  const totalText = `${getOrderReceiptTotal(order).toLocaleString('tr-TR')} ₺`;
+  const paymentMethod = String(order?.paymentMethod || '').trim();
+  if (paymentMethod) {
+    totalEl.innerHTML = `${totalText}<div style="font-size:10px; font-weight:500; margin-top:2px;">(Ödeme: ${escHtml(paymentMethod)})</div>`;
+  } else {
+    totalEl.textContent = totalText;
+  }
 
+  return true;
+}
+
+function printReceipt(orderId, orderOverride = null) {
+  if (!orderId) return;
+
+  const order = orderOverride || (ordersCache || []).find(o => o.id === orderId) || (deliveredCache || []).find(o => o.id === orderId);
+  if (!order) {
+    toast('Sipariş bulunamadı!', 'error');
+    return;
+  }
+
+  if (!populatePosReceipt(order, orderId)) {
+    toast('Fiş şablonu bulunamadı!', 'error');
+    return;
+  }
+
+  window.print();
+}
+
+function printDoubleReceipt(orderId, orderOverride = null) {
+  if (!orderId) return;
+
+  const order = orderOverride || (ordersCache || []).find(o => o.id === orderId) || (deliveredCache || []).find(o => o.id === orderId);
+  if (!order) {
+    toast('Sipariş bulunamadı!', 'error');
+    return;
+  }
+
+  const receiptEl = document.getElementById('pos-receipt');
+  if (!receiptEl) {
+    toast('Fiş şablonu bulunamadı!', 'error');
+    return;
+  }
+
+  const originalHtml = receiptEl.innerHTML;
+
+  if (!populatePosReceipt(order, orderId)) {
+    toast('Fiş şablonu bulunamadı!', 'error');
+    return;
+  }
+
+  const singleReceiptHtml = receiptEl.innerHTML;
+  const customerHeader = '<div style="text-align:center; font-weight:700; font-size:12px; margin-bottom:6px;">TEPSİ İADE FİŞİ (MÜŞTERİ KOPYASI)</div>';
+  const businessHeader = '<div style="text-align:center; font-weight:700; font-size:12px; margin-bottom:6px;">İŞLETME KOPYASI</div>';
+  const cutLine = '<hr style="border-top: 1px dashed black; margin: 10px 0;"><div style="text-align:center; font-size:11px;"></div>';
+
+  receiptEl.innerHTML = customerHeader + singleReceiptHtml + cutLine + businessHeader + singleReceiptHtml;
+
+  const restoreReceipt = () => {
+    receiptEl.innerHTML = originalHtml;
+  };
+
+  window.addEventListener('afterprint', restoreReceipt, { once: true });
   window.print();
 }
 
@@ -4794,8 +5075,16 @@ async function loadUserSettingsPage() {
           ? `<button data-user-id="${uid}" data-current-status="active" onclick="toggleUserStatus('${uid}', true)" class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">Pasif Yap</button>`
           : `<button data-user-id="${uid}" data-current-status="inactive" onclick="toggleUserStatus('${uid}', false)" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">Aktif Yap</button>`;
 
-        // Show permanent delete button for every user (no special protections)
-        const hardDeleteBtn = `<button onclick="deleteUser('${uid}')" class="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded font-semibold transition" title="Kullanıcıyı Sil">Kullanıcıyı Sil</button>`;
+        // Show permanent delete button with root protection
+        const isProtected = u.email === 'admin@sofuoglu.com' || u.email === 'patron@sofuoglu.com';
+        let hardDeleteBtn;
+        if (isSelf) {
+          hardDeleteBtn = `<button disabled class="inline-flex items-center gap-2 cursor-not-allowed text-gray-400 bg-gray-200 text-xs px-3 py-1 rounded font-semibold" title="Kendi hesabınızı silemezsiniz">Kendin</button>`;
+        } else if (isProtected) {
+          hardDeleteBtn = `<button disabled class="inline-flex items-center gap-2 cursor-not-allowed bg-red-50 text-red-300 text-xs px-3 py-1 rounded font-semibold" title="Ana yönetici hesapları silinemez">Korunan</button>`;
+        } else {
+          hardDeleteBtn = `<button onclick="deleteUser('${uid}')" class="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded font-semibold transition" title="Kullanıcıyı Sil">Sil</button>`;
+        }
 
         // Her kullanıcı satırında toggle göster (developer dahil).
         // Sadece kendi hesabınız için buton devre dışı bırakılır (kendini kilitlemeyi önlemek için).
